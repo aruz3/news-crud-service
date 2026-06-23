@@ -1,0 +1,32 @@
+POST http://localhost:8080/api/news
+Content-Type: application/json
+
+{
+  "title": "Первая новость",
+  "content": "Текст новости для теста",
+  "publishedAt": "2026-06-21",
+  "author": "Аружан"
+}
+
+### Получить все новости
+GET http://localhost:8080/api/news
+
+### Получить новость по ID (замени 1 на реальный id из ответа выше)
+GET http://localhost:8080/api/news/1
+
+### Обновить новость
+PUT http://localhost:8080/api/news/1
+Content-Type: application/json
+
+{
+  "title": "Обновлённый заголовок",
+  "content": "Обновлённый текст",
+  "publishedAt": "2026-06-22",
+  "author": "Аружан"
+}
+
+### Удалить новость
+DELETE http://localhost:8080/api/news/1
+
+### Проверка 404 (несуществующий id)
+GET http://localhost:8080/api/news/999
