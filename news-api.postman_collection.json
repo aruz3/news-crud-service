@@ -1,0 +1,219 @@
+{
+  "info": {
+    "name": "News CRUD Service — JWT Auth (TASK-003)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "adminAccessToken", "value": "" },
+    { "key": "studentAccessToken", "value": "" },
+    { "key": "adminRefreshToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register ADMIN",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@test.com\",\n  \"password\": \"password123\",\n  \"role\": \"ADMIN\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        },
+        {
+          "name": "Register STUDENT",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@test.com\",\n  \"password\": \"password123\",\n  \"role\": \"STUDENT\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        },
+        {
+          "name": "Login ADMIN",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const data = pm.response.json();",
+                  "pm.collectionVariables.set('adminAccessToken', data.accessToken);",
+                  "pm.collectionVariables.set('adminRefreshToken', data.refreshToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@test.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Login STUDENT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const data = pm.response.json();",
+                  "pm.collectionVariables.set('studentAccessToken', data.accessToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@test.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Login - wrong password (brute-force test)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@test.com\",\n  \"password\": \"wrongpassword\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Refresh ADMIN",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{adminRefreshToken}}\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/refresh"
+          }
+        },
+        {
+          "name": "Logout ADMIN",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{adminRefreshToken}}\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/logout"
+          }
+        },
+        {
+          "name": "Refresh after logout (expect 401)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{adminRefreshToken}}\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/refresh"
+          }
+        }
+      ]
+    },
+    {
+      "name": "News",
+      "item": [
+        {
+          "name": "GET news - no token (expect 401)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/news"
+          }
+        },
+        {
+          "name": "GET news - ADMIN token (expect 200)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminAccessToken}}" }],
+            "url": "{{baseUrl}}/api/news"
+          }
+        },
+        {
+          "name": "GET news/{id} - not found (expect 404)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminAccessToken}}" }],
+            "url": "{{baseUrl}}/api/news/999"
+          }
+        },
+        {
+          "name": "POST news - ADMIN (expect 201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Тест\",\n  \"content\": \"Контент\",\n  \"author\": \"Admin User\",\n  \"publishedAt\": \"2026-06-28\"\n}"
+            },
+            "url": "{{baseUrl}}/api/news"
+          }
+        },
+        {
+          "name": "POST news - STUDENT (expect 403)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{studentAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Тест\",\n  \"content\": \"Контент\",\n  \"author\": \"Admin User\",\n  \"publishedAt\": \"2026-06-28\"\n}"
+            },
+            "url": "{{baseUrl}}/api/news"
+          }
+        },
+        {
+          "name": "PUT news/{id} - ADMIN",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Обновлено\",\n  \"content\": \"Новый контент\",\n  \"author\": \"Admin User\",\n  \"publishedAt\": \"2026-06-28\"\n}"
+            },
+            "url": "{{baseUrl}}/api/news/1"
+          }
+        },
+        {
+          "name": "DELETE news/{id} - ADMIN",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminAccessToken}}" }],
+            "url": "{{baseUrl}}/api/news/1"
+          }
+        }
+      ]
+    }
+  ]
+}

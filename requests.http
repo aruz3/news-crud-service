@@ -30,3 +30,97 @@ DELETE http://localhost:8080/api/news/1
 
 ### Проверка 404 (несуществующий id)
 GET http://localhost:8080/api/news/999
+
+### Регистрация ADMIN
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "email": "admin@test.com",
+  "password": "password123",
+  "role": "ADMIN"
+}
+
+### Регистрация STUDENT
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "email": "student@test.com",
+  "password": "password123",
+  "role": "STUDENT"
+}
+
+### Логин ADMIN
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@test.com",
+  "password": "password123"
+}
+
+### GET news без токена
+GET http://localhost:8080/api/news
+
+### GET news с токеном ADMIN
+GET http://localhost:8080/api/news
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkB0ZXN0LmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4MjY0MzAwNCwiZXhwIjoxNzgyNjQzOTA0fQ.Pjq6SnTceo_XBgL9RrBsJWpnp-iszajcyk7PxBtPVIc
+
+### Логин STUDENT
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "email": "student@test.com",
+  "password": "password123"
+}
+
+### STUDENT создаёт новость (ожидаем 403)
+POST http://localhost:8080/api/news
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHVkZW50QHRlc3QuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODI2NDQyNDUsImV4cCI6MTc4MjY0NTE0NX0.1VQckWbmepxsGJeT3zWcT3W9mKxsTjnNwg4rqh0qTaU
+Content-Type: application/json
+
+{
+  "title": "Тест",
+  "content": "Контент",
+  "author": "Admin User",
+  "publishedAt": "2026-06-28"
+}
+
+### ADMIN создаёт новость (ожидаем 201)
+POST http://localhost:8080/api/news
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkB0ZXN0LmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4MjY0NDE0MywiZXhwIjoxNzgyNjQ1MDQzfQ.eqh_A3ZWOjmTlwhzaBRmiFzW3Nc2nLQhVJsrqfSc3yk
+Content-Type: application/json
+
+{
+  "title": "Тест",
+  "content": "Контент",
+  "author": "Admin User",
+  "publishedAt": "2026-06-28"
+}
+
+### Refresh ADMIN (используем refreshToken из логина ADMIN)
+POST http://localhost:8080/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkB0ZXN0LmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4MjY0NDU1MywiZXhwIjoxNzgzMjQ5MzUzfQ.9KJKxFBJVsH4LvHJKB0zbGqCoUYSA4oQYxwAYWM6FqM"
+}
+
+### Logout ADMIN
+POST http://localhost:8080/auth/logout
+Content-Type: application/json
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkB0ZXN0LmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4MjY0NDU1MywiZXhwIjoxNzgzMjQ5MzUzfQ.9KJKxFBJVsH4LvHJKB0zbGqCoUYSA4oQYxwAYWM6FqM"
+}
+
+### Логин с неверным паролем #1
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@test.com",
+  "password": "wrongpassword"
+}
